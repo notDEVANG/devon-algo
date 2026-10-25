@@ -31,6 +31,25 @@ The benchmark is an equal-weight, daily-rebalanced buy-and-hold of the same stoc
 Conclusion: no edge was demonstrated. The strategy trailed buy-and-hold in both halves of the
 data, so this is not just an overfitting or regime story. It was not taken to live trading.
 
+## Follow-up: pre-registered momentum tests
+
+After the trend strategy failed, two more hypotheses were written down in
+`RESEARCH_LOG.md` before being run: monthly momentum (top 10 of 94 stocks), and the same
+with a market-breadth cash filter. The log fixed the pass/fail criteria, a development
+period (to 2025-10-23) and a holdout (the following year). Each ran once, and every run
+is recorded in `research_runs.csv`.
+
+| | Dev CAGR | Benchmark | Holdout | Benchmark | Max drawdown | Benchmark |
+|---|---|---|---|---|---|---|
+| H1 momentum | 43.9% | 28.1% | -15.2% | -3.8% | -25.1% | -19.9% |
+| H2 momentum + filter | 34.4% | 28.1% | -15.6% | -3.8% | -25.1% | -19.9% |
+
+Both were rejected. They beat the benchmark in development, including every neighbouring
+setting, but lost to it in the holdout year and had deeper drawdowns. The development
+figures are likely flattered by survivorship bias and should not be read as an edge. One
+criterion (minimum number of rebalances, 40 to 30) was amended before any run because the
+original could not be met with 5 years of data; the amendment is recorded in the log.
+
 ## Method
 
 - **Data:** about 5 years of daily candles per stock from Angel One SmartAPI, fetched
@@ -71,7 +90,8 @@ universe.py      Nifty 100 list (cached) and per-stock file paths
 data_loader.py   loads candles, repairs tiny OHLC inconsistencies, filters short histories
 strategy.py      indicators and rules, with the written hypothesis
 costs.py         delivery cost and slippage model
-engine.py        portfolio backtest engine
+engine.py        portfolio backtest engine (trend strategy)
+rebalance_engine.py  monthly-rebalance engine (momentum hypotheses)
 report.py        performance metrics and benchmark
 notify.py        Telegram alerts
 scripts/
@@ -80,6 +100,8 @@ scripts/
   check_data.py       data quality report
   run_backtest.py     full backtest report
   sensitivity.py      parameter robustness grid
+  run_research.py     pre-registered momentum tests (no parameters, runs logged)
+RESEARCH_LOG.md  protocol, pre-registered hypotheses, trial log, outcome
 ```
 
 ## Setup
@@ -124,5 +146,6 @@ python scripts/sensitivity.py
 
 ## Status
 
-Data pipeline and backtester: done and tested. Live trading: deliberately not built, because
-the only strategy tested did not beat buy-and-hold after costs.
+Data pipeline and both backtesters: done and tested. Three strategies tested (one trend,
+two momentum); none beat buy-and-hold under the rules fixed in advance. Live trading was
+deliberately not built. The project is closed.
